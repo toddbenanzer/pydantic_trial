@@ -7,8 +7,8 @@ from pathlib import Path
 import anthropic
 from pydantic import BaseModel, Field
 
-from .base import LLMProvider, LLMResponse, AudioResponse, ReferenceFile
-from .config import get_credentials
+from ..base import LLMProvider, LLMResponse, AudioResponse, ReferenceFile
+from ..config import get_credentials
 
 class AnthropicProviderConfig(BaseModel):
     """Configuration for Anthropic provider"""

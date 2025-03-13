@@ -8,8 +8,8 @@ import asyncio
 from openai import AsyncOpenAI
 from pydantic import BaseModel, Field
 
-from .base import LLMProvider, LLMResponse, AudioResponse, ReferenceFile, SystemMessage, UserMessage
-from .config import get_credentials
+from ..base import LLMProvider, LLMResponse, AudioResponse, ReferenceFile, SystemMessage, UserMessage
+from ..config import get_credentials
 
 class OpenAIProviderConfig(BaseModel):
     """Configuration for OpenAI provider"""

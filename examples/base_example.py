@@ -5,6 +5,8 @@ import asyncio
 import os
 from pathlib import Path
 
+# With the refactored structure, imports remain the same as the package 
+# exports all providers from its top-level namespace
 from llm_interface import (
     create_provider,
     OpenAIProvider,

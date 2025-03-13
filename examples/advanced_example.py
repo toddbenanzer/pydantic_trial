@@ -118,3 +118,62 @@ class SmartAgent(BaseModel):
             for name, prov in self.providers.items():
                 try:
                     return await prov.text_to_speech(text, **kwargs)
+                except NotImplementedError:
+                    continue
+            
+            # If no provider supports TTS, raise error
+            raise NotImplementedError("No configured provider supports text-to-speech")
+
+# Example usage of the SmartAgent
+async def example_smart_agent():
+    # Create providers
+    openai_provider = create_provider("openai")
+    anthropic_provider = create_provider("anthropic")
+    
+    # Create agent with multiple providers
+    agent = SmartAgent(
+        name="Research Assistant",
+        description="A smart assistant that can answer questions and generate code",
+        providers={
+            "openai": openai_provider,
+            "anthropic": anthropic_provider
+        },
+        default_provider="openai"
+    )
+    
+    # Sample reference document
+    ref_file_path = Path("research_data.txt")
+    with open(ref_file_path, "w") as f:
+        f.write("The population of France in 2023 was approximately 68 million people.\n"
+                "The capital city is Paris with a population of about 2.1 million.\n"
+                "France is known for its cuisine, art, and the Eiffel Tower.")
+    
+    # Add reference file
+    await agent.add_reference_file(ref_file_path)
+    
+    # Ask a question using the default provider (OpenAI)
+    response1 = await agent.ask(
+        prompt="What is the population of France?",
+        system_message="You are a helpful research assistant."
+    )
+    print(f"Response using OpenAI:\n{response1.content}\n")
+    
+    # Ask a follow-up question (should include context from previous interaction)
+    response2 = await agent.ask(
+        prompt="And what is its capital city?",
+        system_message="You are a helpful research assistant."
+    )
+    print(f"Follow-up response with context:\n{response2.content}\n")
+    
+    # Generate code using Anthropic
+    code_response = await agent.generate_code(
+        prompt="Write a Python function to calculate the factorial of a number.",
+        provider="anthropic"
+    )
+    print(f"Code generation using Anthropic:\n{code_response.content}\n")
+    
+    # Clean up
+    os.remove(ref_file_path)
+
+if __name__ == "__main__":
+    asyncio.run(example_smart_agent())

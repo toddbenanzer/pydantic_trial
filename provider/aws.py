@@ -14,8 +14,8 @@ import base64
 import boto3
 from pydantic import BaseModel, Field
 
-from .base import LLMProvider, LLMResponse, AudioResponse, ReferenceFile
-from .config import get_credentials
+from ..base import LLMProvider, LLMResponse, AudioResponse, ReferenceFile
+from ..config import get_credentials
 
 class AWSProviderConfig(BaseModel):
     """Configuration for AWS Bedrock provider"""
@@ -309,3 +309,75 @@ class AWSProvider(LLMProvider):
             model=model_id,
             raw_response=response
         )
+        
+    async def text_to_speech(
+        self, 
+        text: str, 
+        voice_id: Optional[str] = "Matthew",
+        engine: Optional[str] = "neural",
+        **kwargs
+    ) -> AudioResponse:
+        """
+        Convert text to speech using AWS Polly.
+        
+        Args:
+            text: Text to convert to speech
+            voice_id: Voice ID to use
+            engine: TTS engine to use (standard, neural)
+            **kwargs: Additional parameters for API
+            
+        Returns:
+            AudioResponse with audio data
+        """
+        # Create Polly client
+        polly_client = boto3.client(
+            'polly',
+            region_name=kwargs.get('region_name', 'us-east-1'),
+            aws_access_key_id=self.client._credentials.access_key,
+            aws_secret_access_key=self.client._credentials.secret_key
+        )
+        
+        # Request speech synthesis
+        response = polly_client.synthesize_speech(
+            Text=text,
+            OutputFormat='mp3',
+            VoiceId=voice_id,
+            Engine=engine
+        )
+        
+        # Get audio stream
+        audio_data = response['AudioStream'].read()
+        
+        return AudioResponse(
+            content=f"Audio generated using AWS Polly with voice {voice_id}",
+            model=f"aws-polly-{engine}",
+            audio_data=audio_data,
+            raw_response=response
+        )
+    
+    async def add_reference_file(
+        self, 
+        file_path: Union[str, Path],
+        **kwargs
+    ) -> ReferenceFile:
+        """
+        Add reference file.
+        AWS Bedrock doesn't support direct file uploads in the same way,
+        so we'll create a ReferenceFile object for local processing.
+        
+        Args:
+            file_path: Path to file
+            **kwargs: Additional parameters
+            
+        Returns:
+            ReferenceFile without file_id
+        """
+        file_path = Path(file_path)
+        
+        # Create reference file
+        ref_file = ReferenceFile(
+            path=file_path,
+            content_type=None
+        )
+        
+        return ref_file

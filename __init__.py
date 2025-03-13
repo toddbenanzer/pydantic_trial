@@ -17,10 +17,10 @@ from .base import (
 from .config import get_credentials, load_config
 
 # Import providers
-from .openai_provider import OpenAIProvider, OpenAIProviderConfig
-from .anthropic_provider import AnthropicProvider, AnthropicProviderConfig
-from .aws_provider import AWSProvider, AWSProviderConfig
-from .huggingface_provider import HuggingFaceProvider, HuggingFaceProviderConfig
+from .provider.openai import OpenAIProvider, OpenAIProviderConfig
+from .provider.anthropic import AnthropicProvider, AnthropicProviderConfig
+from .provider.aws import AWSProvider, AWSProviderConfig
+from .provider.huggingface import HuggingFaceProvider, HuggingFaceProviderConfig
 
 __version__ = "0.1.0"
 
